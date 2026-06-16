@@ -1,9 +1,12 @@
 import whisper
 
-model = whisper.load_model("base")
-
 def transcribe_video(video_path):
 
-    result = model.transcribe(video_path)
+    model = whisper.load_model("base")
 
-    return result["text"]
+    result = model.transcribe(
+        video_path,
+        word_timestamps=True
+    )
+
+    return result
