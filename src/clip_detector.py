@@ -19,12 +19,20 @@ def find_interesting_segments(segments):
 
         text = segment["text"].lower()
 
-        if any(word in text for word in keywords):
+        matched_keyword = None
+
+        for keyword in keywords:
+            if keyword in text:
+                matched_keyword = keyword
+                break
+
+        if matched_keyword:
 
             clips.append({
-                "start": segment["start"],
-                "end": segment["end"],
-                "text": segment["text"]
+                "start": max(0, segment["start"] - 10),
+                "end": segment["end"] + 20,
+                "text": segment["text"],
+                "keyword": matched_keyword
             })
 
     return clips

@@ -2,7 +2,8 @@ import os
 import streamlit as st
 from src.transcription import transcribe_video
 from src.clip_detector import find_interesting_segments
-from src.video_cutter import cut_clip
+from src.video_cutter import cut_clip , get_clip_segments
+from src.caption_generator import create_srt , add_captions
 
 st.title("AI Clip Generator")
 uploaded_file = st.file_uploader(
@@ -24,40 +25,61 @@ if uploaded_file:
 
     # st.subheader("Transcript")
     # st.write(transcript["text"])
-    st.subheader("Segments")
+    # st.subheader("Segments")
 
-    for segment in transcript["segments"][:10]:
-        st.write(
-            f"{segment['start']:.2f} - "
-            f"{segment['end']:.2f}"
-        )
-        st.write(segment["text"])
+    # for segment in transcript["segments"][:10]:
+    #     st.write(
+    #         f"{segment['start']:.2f} - "
+    #         f"{segment['end']:.2f}"
+    #     )
+    #     st.write(segment["text"])
 
     clips = find_interesting_segments(transcript["segments"])
 
     st.subheader("Potential Clips")
 
-    for clip in clips[:10]:
+    # for clip in clips[:10]:
 
-        st.write(
-            f"{clip['start']:.2f} - "
-            f"{clip['end']:.2f}"
-        )
+    #     st.write(f"Matched keyword: {clip['keyword']}")
 
-        st.write(clip["text"])
-    if clips:
+    #     st.write(
+    #         f"{clip['start']:.2f} - "
+    #         f"{clip['end']:.2f}"
+    #     )
 
-        first_clip = clips[0]
+    #     st.write(clip["text"])
 
-        output_path = "outputs/clip1.mp4"
+    if not clips:
+        st.warning("No clips found")
+        st.stop()
+
+    for i, clip in enumerate(clips[:5]):
+
+        output_path = f"outputs/clip_{i}.mp4"
 
         cut_clip(
             path,
-            first_clip["start"],
-            first_clip["end"],
+            clip["start"],
+            clip["end"],
             output_path
         )
+        clip_segments = get_clip_segments(transcript["segments"],clip["start"],clip["end"])
+        srt_path = f"outputs/clip_{i}.srt"
 
-        st.success("Clip generated!")
+        create_srt(clip_segments,clip["start"],srt_path)
+        captioned_path = (f"outputs/captioned_{i}.mp4")
 
-        st.video(output_path)
+        add_captions(output_path,srt_path,captioned_path)
+
+        # st.write(clip_segments)
+
+        st.subheader(f"Clip {i+1}")
+
+        st.write(
+            f"{clip['start']:.1f}s → {clip['end']:.1f}s"
+        )
+
+        st.write(clip["text"])
+
+        st.video(captioned_path)
+
