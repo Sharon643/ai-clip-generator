@@ -1,3 +1,5 @@
+from src.scorer import score_segment
+
 def find_interesting_segments(segments):
 
     keywords = [
@@ -25,14 +27,20 @@ def find_interesting_segments(segments):
             if keyword in text:
                 matched_keyword = keyword
                 break
+        score = score_segment(text)
 
-        if matched_keyword:
+        if score > 0:
 
             clips.append({
                 "start": max(0, segment["start"] - 10),
                 "end": segment["end"] + 20,
                 "text": segment["text"],
-                "keyword": matched_keyword
+                "keyword": matched_keyword,
+                "score": score
             })
 
+    clips.sort(
+    key=lambda x: x["score"],
+    reverse=True)
+    
     return clips

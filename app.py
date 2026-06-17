@@ -78,6 +78,7 @@ if uploaded_file:
         st.write(
             f"{clip['start']:.1f}s → {clip['end']:.1f}s"
         )
+        st.metric("Score",clip["score"])
 
         st.write(clip["text"])
 

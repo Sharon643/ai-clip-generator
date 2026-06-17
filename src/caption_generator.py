@@ -49,7 +49,7 @@ def add_captions(video_file,srt_file,output_file):
         "-i",
         video_file,
         "-vf",
-        f"subtitles={srt_file}",
+        f"subtitles={srt_file}:force_style='FontSize=18,Alignment=2,MarginV=40'",
         output_file
     ]
 
