@@ -1,0 +1,46 @@
+import json
+from langchain_google_genai import ChatGoogleGenerativeAI
+from dotenv import load_dotenv 
+
+load_dotenv()
+
+def get_llm():
+    llm = ChatGoogleGenerativeAI(
+        model = "gemini-2.5-flash",
+        temperature = 0.3
+    )
+    return llm 
+
+
+def rank_chunk(chunk_text, model):
+
+    llm = get_llm()
+
+    prompt = f"""
+        You are an expert short-form content editor.
+
+        Rate this transcript chunk from 1-100.
+
+        Criteria:
+        - surprising insights
+        - controversial opinions
+        - strong predictions
+        - emotional moments
+        - practical advice
+        - viral potential
+
+        Return ONLY valid JSON.
+
+        Example:
+        {{
+            "score": 85,
+            "reason": "Strong prediction about AI jobs"
+        }}
+
+        Transcript:
+        {chunk_text}
+        """
+
+    response = llm.invoke(prompt)
+
+    return json.loads(response.text)

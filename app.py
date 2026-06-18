@@ -4,6 +4,9 @@ from src.transcription import transcribe_video
 from src.clip_detector import find_interesting_segments
 from src.video_cutter import cut_clip , get_clip_segments
 from src.caption_generator import create_srt , add_captions
+from src.chunker import create_chunks
+from src.gemini_ranking import rank_chunk
+
 
 st.title("AI Clip Generator")
 uploaded_file = st.file_uploader(
@@ -34,7 +37,31 @@ if uploaded_file:
     #     )
     #     st.write(segment["text"])
 
+    chunks = create_chunks(transcript["segments"])
+    # st.subheader("Chunks")
+
+    # for chunk in chunks[:3]:
+
+    #     st.write(
+    #         f"{chunk['start']:.1f}s "
+    #         f"→ "
+    #         f"{chunk['end']:.1f}s"
+    #     )
+
+    #     st.write(chunk["text"])
+    #     st.write(f"Total chunks: {len(chunks)}")
+
+    #     st.divider()
+
     clips = find_interesting_segments(transcript["segments"])
+    result = rank_chunk(
+    chunks[0]["text"]
+    )
+
+    st.subheader("Gemini Test")
+
+    st.write(result)
+    
 
     st.subheader("Potential Clips")
 
