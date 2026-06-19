@@ -53,14 +53,46 @@ if uploaded_file:
 
     #     st.divider()
 
-    clips = find_interesting_segments(transcript["segments"])
-    result = rank_chunk(
-    chunks[0]["text"]
-    )
+    # clips = find_interesting_segments(transcript["segments"])
+    ranked_chunks = []
+
+    for chunk in chunks[:5]:
+
+        result = rank_chunk(
+            chunk["text"]
+        )
+
+        chunk["score"] = result["score"]
+        chunk["reason"] = result["reason"]
+
+        ranked_chunks.append(chunk)
+
+    ranked_chunks.sort(key=lambda x: x["score"],reverse=True)
 
     st.subheader("Gemini Test")
 
-    st.write(result)
+    # st.write(result)
+
+    for chunk in ranked_chunks:
+        st.write(chunk)
+
+    top_chunk = ranked_chunks[0]
+
+    st.subheader("Best Gemini Chunk")
+
+    st.metric(
+        "Score",
+        top_chunk["score"]
+    )
+
+    st.write(
+        top_chunk["reason"]
+    )
+
+    st.write(
+        f"{top_chunk['start']:.1f}s → "
+        f"{top_chunk['end']:.1f}s"
+    )
     
 
     st.subheader("Potential Clips")
@@ -76,38 +108,38 @@ if uploaded_file:
 
     #     st.write(clip["text"])
 
-    if not clips:
+    if not ranked_chunks:
         st.warning("No clips found")
         st.stop()
 
-    for i, clip in enumerate(clips[:5]):
+    # for i, clip in enumerate(ranked_chunks[:5]):
 
-        output_path = f"outputs/clip_{i}.mp4"
+    output_path = f"outputs/clip.mp4"
 
-        cut_clip(
-            path,
-            clip["start"],
-            clip["end"],
-            output_path
-        )
-        clip_segments = get_clip_segments(transcript["segments"],clip["start"],clip["end"])
-        srt_path = f"outputs/clip_{i}.srt"
+    cut_clip(
+        path,
+        top_chunk["start"],
+        top_chunk["end"],
+        output_path
+    )
+        # clip_segments = get_clip_segments(transcript["segments"],clip["start"],clip["end"])
+        # srt_path = f"outputs/clip_{i}.srt"
 
-        create_srt(clip_segments,clip["start"],srt_path)
-        captioned_path = (f"outputs/captioned_{i}.mp4")
+        # create_srt(clip_segments,clip["start"],srt_path)
+        # captioned_path = (f"outputs/captioned_{i}.mp4")
 
-        add_captions(output_path,srt_path,captioned_path)
+        # add_captions(output_path,srt_path,captioned_path)
 
-        # st.write(clip_segments)
+        # # st.write(clip_segments)
 
-        st.subheader(f"Clip {i+1}")
+        # st.subheader(f"Clip {i+1}")
 
-        st.write(
-            f"{clip['start']:.1f}s → {clip['end']:.1f}s"
-        )
-        st.metric("Score",clip["score"])
+        # st.write(
+        #     f"{clip['start']:.1f}s → {clip['end']:.1f}s"
+        # )
+        # st.metric("Score",clip["score"])
 
-        st.write(clip["text"])
+        # st.write(clip["text"])
 
-        st.video(captioned_path)
+    st.video(output_path)
 

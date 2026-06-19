@@ -12,7 +12,7 @@ def get_llm():
     return llm 
 
 
-def rank_chunk(chunk_text, model):
+def rank_chunk(chunk_text):
 
     llm = get_llm()
 
@@ -43,4 +43,11 @@ def rank_chunk(chunk_text, model):
 
     response = llm.invoke(prompt)
 
-    return json.loads(response.text)
+    cleaned = (
+        response.content
+        .replace("```json", "")
+        .replace("```", "")
+        .strip()
+    )
+
+    return json.loads(cleaned)
