@@ -1,8 +1,8 @@
-from src.gemini_ranking import get_llm
+from src.gemini_ranking import get_llm , get_local_llm
 
 def generate_hook(text):
 
-    llm = get_llm()
+    llm = get_local_llm()
 
     prompt = f"""
 Create a viral YouTube Shorts hook.

@@ -7,6 +7,8 @@ from src.caption_generator import create_srt , add_captions
 from src.chunker import create_chunks
 from src.gemini_ranking import rank_chunk
 from src.hook_generator import generate_hook
+from src.shorts_converter import convert_to_vertical
+from src.llm import get_llm , get_local_llm
 
 
 st.title("AI Clip Generator")
@@ -118,7 +120,8 @@ if uploaded_file:
         hook = generate_hook(
             chunk["text"]
         )
-
+        vertical_clip = f"outputs/clip_{i}_vertical.mp4"
+        convert_to_vertical(output_path,vertical_clip)
 
 
         clip_segments = get_clip_segments(transcript["segments"],chunk["start"],chunk["end"])
@@ -127,7 +130,7 @@ if uploaded_file:
         create_srt(clip_segments,chunk["start"],srt_path)
         captioned_path = (f"outputs/captioned_{i}.mp4")
 
-        add_captions(output_path,srt_path,captioned_path)
+        add_captions(vertical_clip,srt_path,captioned_path)
 
 
         st.subheader(f"Clip {i+1}")

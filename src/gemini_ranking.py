@@ -1,20 +1,10 @@
 import json
-from langchain_google_genai import ChatGoogleGenerativeAI
-from dotenv import load_dotenv 
-
-load_dotenv()
-
-def get_llm():
-    llm = ChatGoogleGenerativeAI(
-        model = "gemini-2.5-flash",
-        temperature = 0.3
-    )
-    return llm 
+from src.llm import get_llm , get_local_llm
 
 
 def rank_chunk(chunk_text):
 
-    llm = get_llm()
+    llm = get_local_llm()
 
     prompt = f"""
         You are an expert short-form content editor.
