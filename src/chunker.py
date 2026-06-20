@@ -1,4 +1,4 @@
-def create_chunks(segments,chunk_duration=120):
+def create_chunks(segments,chunk_duration=60):
 
     chunks = []
 

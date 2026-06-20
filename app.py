@@ -6,6 +6,7 @@ from src.video_cutter import cut_clip , get_clip_segments
 from src.caption_generator import create_srt , add_captions
 from src.chunker import create_chunks
 from src.gemini_ranking import rank_chunk
+from src.hook_generator import generate_hook
 
 
 st.title("AI Clip Generator")
@@ -68,31 +69,22 @@ if uploaded_file:
         ranked_chunks.append(chunk)
 
     ranked_chunks.sort(key=lambda x: x["score"],reverse=True)
+    for chunk in ranked_chunks[:5]:
+        st.write(
+            chunk["score"],
+            chunk["start"],
+            chunk["end"]
+        )
 
     st.subheader("Gemini Test")
 
     # st.write(result)
 
-    for chunk in ranked_chunks:
-        st.write(chunk)
+    # for chunk in ranked_chunks:
+    #     st.write(chunk)
 
-    top_chunk = ranked_chunks[0]
+    top_chunks = ranked_chunks[:3]
 
-    st.subheader("Best Gemini Chunk")
-
-    st.metric(
-        "Score",
-        top_chunk["score"]
-    )
-
-    st.write(
-        top_chunk["reason"]
-    )
-
-    st.write(
-        f"{top_chunk['start']:.1f}s → "
-        f"{top_chunk['end']:.1f}s"
-    )
     
 
     st.subheader("Potential Clips")
@@ -112,34 +104,41 @@ if uploaded_file:
         st.warning("No clips found")
         st.stop()
 
-    # for i, clip in enumerate(ranked_chunks[:5]):
+    for i, chunk in enumerate(top_chunks):
 
-    output_path = f"outputs/clip.mp4"
+        output_path = f"outputs/clip_{i}.mp4"
 
-    cut_clip(
-        path,
-        top_chunk["start"],
-        top_chunk["end"],
-        output_path
-    )
-        # clip_segments = get_clip_segments(transcript["segments"],clip["start"],clip["end"])
-        # srt_path = f"outputs/clip_{i}.srt"
 
-        # create_srt(clip_segments,clip["start"],srt_path)
-        # captioned_path = (f"outputs/captioned_{i}.mp4")
+        cut_clip(
+            path,
+            chunk["start"],
+            chunk["end"],
+            output_path
+        )
+        hook = generate_hook(
+            chunk["text"]
+        )
 
-        # add_captions(output_path,srt_path,captioned_path)
 
-        # # st.write(clip_segments)
 
-        # st.subheader(f"Clip {i+1}")
+        clip_segments = get_clip_segments(transcript["segments"],chunk["start"],chunk["end"])
+        srt_path = f"outputs/clip_{i}.srt"
 
-        # st.write(
-        #     f"{clip['start']:.1f}s → {clip['end']:.1f}s"
-        # )
-        # st.metric("Score",clip["score"])
+        create_srt(clip_segments,chunk["start"],srt_path)
+        captioned_path = (f"outputs/captioned_{i}.mp4")
 
-        # st.write(clip["text"])
+        add_captions(output_path,srt_path,captioned_path)
 
-    st.video(output_path)
+
+        st.subheader(f"Clip {i+1}")
+        st.write(f"Hook: {hook}")
+
+        st.write(
+            f"{chunk['start']:.1f}s → {chunk['end']:.1f}s"
+        )
+        st.metric("Score",chunk["score"])
+
+        st.write(chunk["text"])
+        st.video(captioned_path)
+
 
