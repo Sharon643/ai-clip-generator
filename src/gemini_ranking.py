@@ -40,4 +40,15 @@ def rank_chunk(chunk_text):
         .strip()
     )
 
-    return json.loads(cleaned)
+    try:
+        return json.loads(cleaned)
+
+    except Exception:
+
+        print("FAILED JSON:")
+        print(cleaned)
+
+        return {
+            "score": 0,
+            "reason": "Parsing failed"
+        }

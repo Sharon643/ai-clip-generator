@@ -78,7 +78,7 @@ if uploaded_file:
             chunk["end"]
         )
 
-    st.subheader("Gemini Test")
+    # st.subheader("Gemini Test")
 
     # st.write(result)
 
